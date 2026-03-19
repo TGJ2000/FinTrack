@@ -1,15 +1,17 @@
 ﻿using Dapper;
 using FinTrack.DTOs;
 using FinTrack.Models;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace FinTrack.Repositories
 {
-    public class TransactionRepository(SqlConnection connection)
+    public class TransactionRepository(IDbConnectionFactory connectionFactory)
     {
         public async Task<List<Models.Transaction>> GetTransactions(int user, DateOnly? startDate, DateOnly? endDate, string? type, int? page, int? pageSize)
         {
+            using SqlConnection connection = connectionFactory.CreateConnection();
             DateTime? start = startDate.HasValue ? startDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
             DateTime? end = endDate.HasValue ? endDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
             int pageNumber = page ?? 1;
@@ -21,6 +23,7 @@ namespace FinTrack.Repositories
 
         public async Task<List<Models.Transaction>> ExportTransactions(int user, DateOnly? startDate, DateOnly? endDate, string? type)
         {
+            using SqlConnection connection = connectionFactory.CreateConnection();
             DateTime? start = startDate.HasValue ? startDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
             DateTime? end = endDate.HasValue ? endDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
             string sql = "sp_ExportTransactions";
@@ -29,6 +32,7 @@ namespace FinTrack.Repositories
         }
         public async Task<List<MonthlyReport>> GetMonthlyReport(int user, int year)
         {
+            using SqlConnection connection = connectionFactory.CreateConnection();
             string sql = "sp_GetMonthlyReport";
             IEnumerable<MonthlyReport>? userTransactions = await connection.QueryAsync<MonthlyReport>(sql: sql, param: new { UserId = user, Year = year }, commandType: CommandType.StoredProcedure);
             return userTransactions.ToList();
@@ -36,6 +40,7 @@ namespace FinTrack.Repositories
 
         public async Task CreateTransaction(int userId, CreateTransactionDto transaction)
         {
+            using SqlConnection connection = connectionFactory.CreateConnection();
             DateTime transDate = transaction.TransactionDate.HasValue ? transaction.TransactionDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime.Now);
             DateTime createdAt = DateTime.Now;
             string sql = "INSERT INTO Transactions (UserId, CategoryId, Amount, Type, Description, TransactionDate, CreatedAt) VALUES (@UserId, @CategoryId, @Amount, @Type, @Description, @TransactionDate, @CreatedAt)";
@@ -44,6 +49,7 @@ namespace FinTrack.Repositories
 
         public async Task UpdateTransaction(int userId, int transactionId, UpdateTransactionDto transaction)
         {
+            using SqlConnection connection = connectionFactory.CreateConnection();
             string sql = "UPDATE Transactions SET " +
                 "CategoryId = COALESCE(@CategoryId, CategoryId)," +
                 "Amount = COALESCE(@Amount, Amount)," +
@@ -58,12 +64,14 @@ namespace FinTrack.Repositories
 
         public async Task DeleteTransaction(int userId, int transactionId)
         {
+            using SqlConnection connection = connectionFactory.CreateConnection();
             string sql = "DELETE FROM Transactions WHERE TransactionId = @TransactionId AND UserId = @UserId";
             await connection.ExecuteAsync(sql: sql, param: new { TransactionId = transactionId, UserId = userId });
         }
 
         public async Task<List<TransactionSummary>> GetTransactionSummary(int user, DateOnly? startDate, DateOnly? endDate)
         {
+            using SqlConnection connection = connectionFactory.CreateConnection();
             DateTime? start = startDate.HasValue ? startDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
             DateTime? end = endDate.HasValue ? endDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
             IEnumerable<TransactionSummary>? transactionSummary = await connection.QueryAsync<TransactionSummary>(sql: "sp_GetTransactionSummary", param: new { UserId = user, StartDate = start, EndDate = end }, commandType: CommandType.StoredProcedure);
