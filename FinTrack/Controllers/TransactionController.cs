@@ -51,6 +51,16 @@ namespace FinTrack.Controllers
             List<TransactionSummary> transactionSummary = await transactionRepository.GetTransactionSummary(user, startDate, endDate);
             return Ok(transactionSummary);
         }
+
+        [Route("monthlyreport")]
+        [HttpGet]
+        public async Task<IActionResult> GetMonthlyReport(int year)
+        {
+            int user = GetUserId();
+            List<MonthlyReport> transactionSummary = await transactionRepository.GetMonthlyReport(user, year);
+            return Ok(transactionSummary);
+        }
+
         [Route("create")]
         [HttpPost]
         public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionDto transaction)
