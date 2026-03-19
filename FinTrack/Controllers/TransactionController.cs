@@ -4,6 +4,7 @@ using FinTrack.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text;
 
 namespace FinTrack.Controllers
 {
@@ -22,6 +23,25 @@ namespace FinTrack.Controllers
             int user = GetUserId();
             List<Transaction> userTransactions = await transactionRepository.GetTransactions(user, startDate, endDate, type, page, pageSize);
             return Ok(userTransactions);
+        }
+        [HttpGet]
+        [Route("export")]
+        public async Task<FileResult> ExportUserTransactions(DateOnly? startDate, DateOnly? endDate, string? type)
+        {
+            int user = GetUserId();
+            List<Transaction> userTransactions = await transactionRepository.ExportTransactions(user, startDate, endDate, type);
+
+            StringBuilder csv = new();
+            csv.AppendLine("TransactionId, TransactionDate, Amount, Type, Description, Category");
+
+            foreach (Transaction item in userTransactions)
+            {
+                csv.AppendLine($"{item.TransactionId}, {item.TransactionDate}, {item.Amount}, {item.Type}, \"{item.Description}\", \"{item.Category}\"");
+            }
+
+            byte[] bytes = Encoding.UTF8.GetBytes(csv.ToString());
+
+            return File(bytes, "text/csv", "transactions.csv");
         }
         [Route("summary")]
         [HttpGet]
