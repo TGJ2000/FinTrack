@@ -27,7 +27,6 @@ namespace FinTrack.Repositories
             IEnumerable<Models.Transaction>? userTransactions = await connection.QueryAsync<Models.Transaction>(sql: sql, param: new { UserId = user, StartDate = start, EndDate = end, Type = type }, commandType: CommandType.StoredProcedure);
             return userTransactions.ToList();
         }
-
         public async Task<List<MonthlyReport>> GetMonthlyReport(int user, int year)
         {
             string sql = "sp_GetMonthlyReport";
