@@ -19,6 +19,22 @@ namespace FinTrack.Repositories
             return userTransactions.ToList();
         }
 
+        public async Task<List<Models.Transaction>> ExportTransactions(int user, DateOnly? startDate, DateOnly? endDate, string? type)
+        {
+            DateTime? start = startDate.HasValue ? startDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+            DateTime? end = endDate.HasValue ? endDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+            string sql = "sp_ExportTransactions";
+            IEnumerable<Models.Transaction>? userTransactions = await connection.QueryAsync<Models.Transaction>(sql: sql, param: new { UserId = user, StartDate = start, EndDate = end, Type = type }, commandType: CommandType.StoredProcedure);
+            return userTransactions.ToList();
+        }
+
+        public async Task<List<MonthlyReport>> GetMonthlyReport(int user, int year)
+        {
+            string sql = "sp_GetMonthlyReport";
+            IEnumerable<MonthlyReport>? userTransactions = await connection.QueryAsync<MonthlyReport>(sql: sql, param: new { UserId = user, Year = year }, commandType: CommandType.StoredProcedure);
+            return userTransactions.ToList();
+        }
+
         public async Task CreateTransaction(int userId, CreateTransactionDto transaction)
         {
             DateTime transDate = transaction.TransactionDate.HasValue ? transaction.TransactionDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime.Now);
