@@ -11,7 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSingleton(new Microsoft.Data.SqlClient.SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSingleton<IDbConnectionFactory>(
+    new 
+    SqlConnectionFactory(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<TransactionRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<CategoryRepository>();
