@@ -43,11 +43,12 @@ namespace FinTrack.Controllers
 
                 List<Claim> claims = new()
                 {
-                    new Claim(ClaimTypes.Email, user.Email),
                     new Claim(type: ClaimTypes.NameIdentifier, user.UserId.ToString())
                 };
 
                 JwtSecurityToken token = new JwtSecurityToken(
+                    issuer: config["Jwt:Issuer"],
+                    audience: config["Jwt:Audience"],
                     claims: claims,
                     signingCredentials: signingCredentials,
                     expires: DateTime.Now.AddMinutes(60)
