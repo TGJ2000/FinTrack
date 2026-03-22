@@ -11,7 +11,7 @@ namespace FinTrack.Controllers
     [Authorize]
     [ApiController]
     [Route(template: "api/transactions")]
-    public class TransactionController(TransactionRepository transactionRepository) : ControllerBase
+    public class TransactionController(ITransactionRepository transactionRepository) : ControllerBase
     {
         private int GetUserId()
         {

@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 
 namespace FinTrack.Repositories
 {
-    public class UserRepository(IDbConnectionFactory connectionFactory)
+    public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepository
     {
         public async Task CreateUser(RegisterDto user)
         {

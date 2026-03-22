@@ -7,7 +7,7 @@ using Microsoft.Data.SqlClient;
 
 namespace FinTrack.Repositories
 {
-    public class CategoryRepository(IDbConnectionFactory connectionFactory)
+    public class CategoryRepository(IDbConnectionFactory connectionFactory) : ICategoryRepository
     {
         public async Task<List<Category>> GetCategories(int user)
         {

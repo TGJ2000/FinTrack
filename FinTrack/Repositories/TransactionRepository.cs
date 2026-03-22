@@ -7,7 +7,7 @@ using System.Data;
 
 namespace FinTrack.Repositories
 {
-    public class TransactionRepository(IDbConnectionFactory connectionFactory)
+    public class TransactionRepository(IDbConnectionFactory connectionFactory) : ITransactionRepository
     {
         public async Task<List<Models.Transaction>> GetTransactions(int user, DateOnly? startDate, DateOnly? endDate, string? type, int? page, int? pageSize)
         {
