@@ -14,9 +14,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<IDbConnectionFactory>(
     new
     SqlConnectionFactory(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<TransactionRepository>();
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<CategoryRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

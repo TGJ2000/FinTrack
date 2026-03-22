@@ -11,7 +11,7 @@ namespace FinTrack.Controllers
     [Authorize]
     [ApiController]
     [Route("api/categories")]
-    public class CategoryController(CategoryRepository categoryRepository) : ControllerBase
+    public class CategoryController(ICategoryRepository categoryRepository) : ControllerBase
     {
         private int GetUserId()
         {
