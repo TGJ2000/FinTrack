@@ -11,12 +11,8 @@ namespace FinTrack.Controllers
     [Authorize]
     [ApiController]
     [Route(template: "api/transactions")]
-    public class TransactionController(ITransactionRepository transactionRepository) : ControllerBase
+    public class TransactionController(ITransactionRepository transactionRepository) : BaseController
     {
-        private int GetUserId()
-        {
-            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-        }
         [HttpGet]
         public async Task<IActionResult> GetUserTransactions(DateOnly? startDate, DateOnly? endDate, string? type, int? page, int? pageSize)
         {

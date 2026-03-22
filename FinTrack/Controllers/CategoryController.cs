@@ -11,13 +11,8 @@ namespace FinTrack.Controllers
     [Authorize]
     [ApiController]
     [Route("api/categories")]
-    public class CategoryController(ICategoryRepository categoryRepository) : ControllerBase
+    public class CategoryController(ICategoryRepository categoryRepository) : BaseController
     {
-        private int GetUserId()
-        {
-            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetCategories()
         {

@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using FinTrack.DTOs;
+using FinTrack.Helpers;
 using FinTrack.Models;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.Data.SqlClient;
@@ -12,8 +13,8 @@ namespace FinTrack.Repositories
         public async Task<List<Models.Transaction>> GetTransactions(int user, DateOnly? startDate, DateOnly? endDate, string? type, int? page, int? pageSize)
         {
             using SqlConnection connection = connectionFactory.CreateConnection();
-            DateTime? start = startDate.HasValue ? startDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
-            DateTime? end = endDate.HasValue ? endDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+            DateTime? start = startDate.ToDateTime();
+            DateTime? end = endDate.ToDateTime();
             int pageNumber = page ?? 1;
             int pageLength = pageSize ?? 20;
             string sql = "sp_GetUserTransactions";
@@ -24,8 +25,8 @@ namespace FinTrack.Repositories
         public async Task<List<Models.Transaction>> ExportTransactions(int user, DateOnly? startDate, DateOnly? endDate, string? type)
         {
             using SqlConnection connection = connectionFactory.CreateConnection();
-            DateTime? start = startDate.HasValue ? startDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
-            DateTime? end = endDate.HasValue ? endDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+            DateTime? start = startDate.ToDateTime();
+            DateTime? end = endDate.ToDateTime();
             string sql = "sp_ExportTransactions";
             IEnumerable<Models.Transaction>? userTransactions = await connection.QueryAsync<Models.Transaction>(sql: sql, param: new { UserId = user, StartDate = start, EndDate = end, Type = type }, commandType: CommandType.StoredProcedure);
             return userTransactions.ToList();
@@ -41,7 +42,7 @@ namespace FinTrack.Repositories
         public async Task CreateTransaction(int userId, CreateTransactionDto transaction)
         {
             using SqlConnection connection = connectionFactory.CreateConnection();
-            DateTime transDate = transaction.TransactionDate.HasValue ? transaction.TransactionDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime.Now);
+            DateTime transDate = transaction.TransactionDate.ToDateTimeOrNow();
             DateTime createdAt = DateTime.Now;
             string sql = "INSERT INTO Transactions (UserId, CategoryId, Amount, Type, Description, TransactionDate, CreatedAt) VALUES (@UserId, @CategoryId, @Amount, @Type, @Description, @TransactionDate, @CreatedAt)";
             await connection.ExecuteAsync(sql: sql, param: new { UserId = userId, transaction.CategoryId, transaction.Amount, transaction.Type, transaction.Description, TransactionDate = transDate, CreatedAt = createdAt });
@@ -58,7 +59,7 @@ namespace FinTrack.Repositories
                 "TransactionDate = COALESCE(@TransactionDate, TransactionDate)" +
                 " WHERE TransactionId = @TransactionId AND UserId = @UserId";
 
-            DateTime? transDate = transaction.TransactionDate.HasValue ? transaction.TransactionDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+            DateTime? transDate = transaction.TransactionDate.ToDateTime();
             await connection.ExecuteAsync(sql: sql, param: new { UserId = userId, TransactionId = transactionId, transaction.CategoryId, transaction.Amount, transaction.Type, transaction.Description, TransactionDate = transDate });
         }
 
@@ -72,8 +73,8 @@ namespace FinTrack.Repositories
         public async Task<List<TransactionSummary>> GetTransactionSummary(int user, DateOnly? startDate, DateOnly? endDate)
         {
             using SqlConnection connection = connectionFactory.CreateConnection();
-            DateTime? start = startDate.HasValue ? startDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
-            DateTime? end = endDate.HasValue ? endDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+            DateTime? start = startDate.ToDateTime();
+            DateTime? end = endDate.ToDateTime();
             IEnumerable<TransactionSummary>? transactionSummary = await connection.QueryAsync<TransactionSummary>(sql: "sp_GetTransactionSummary", param: new { UserId = user, StartDate = start, EndDate = end }, commandType: CommandType.StoredProcedure);
             return transactionSummary.ToList();
         }

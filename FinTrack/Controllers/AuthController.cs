@@ -12,7 +12,7 @@ namespace FinTrack.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthController(IConfiguration config, IUserRepository userRepo) : ControllerBase
+    public class AuthController(IConfiguration config, IUserRepository userRepo) : BaseController
     {
         [HttpPost]
         [Route("register")]
